@@ -1,0 +1,7 @@
+node_modules/
+films/*/out/
+out/
+.env
+*.wav
+!audio/*.wav
+*.whl

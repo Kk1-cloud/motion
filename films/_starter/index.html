@@ -1,0 +1,89 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>film</title>
+<style>html,body{margin:0;background:#141413;overflow:hidden}canvas{display:block;max-width:100vw;max-height:100vh}</style>
+<canvas id="c"></canvas>
+<script src="../../lib/motion.js"></script>
+<script>
+// Starter film. Copy with: npm run new -- <name> and replace SCENES.
+// Contract: window.FILM describes the film, window.seek(t) paints frame t. Nothing else.
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const { clamp, lerp, sp, trackFeel, rng, grid, layout } = M;
+const L = layout(W, H), u = L.u;
+const BPM = 120, G = grid({ bpm: BPM, offset: 0 });
+window.FILM = { dur: G.bar(3), fps: 60, w: W, h: H, bpm: BPM };
+
+const cv = document.getElementById('c'); cv.width = W; cv.height = H;
+const g = cv.getContext('2d');
+const INK = '#141413', PAPER = '#F0EEE6', ACCENT = '#D97757';
+const DISPLAY = '"Georgia", serif', UI = '"Helvetica Neue", Arial, sans-serif';
+
+// One scene per shot. from/to on the beat grid, never on round seconds.
+const SCENES = [
+  { from: 0, to: G.beat(4), draw(t) {                       // hook: type slams on beat 0
+      const words = ['CODE', 'IS', 'THE', 'CAMERA'];
+      words.forEach((w, i) => {
+        const s = sp(t - G.beat(i) * 0.5, 'heavy');
+        const y = L.cy + (i - 1.5) * 17 * u;
+        g.save(); g.translate(L.cx - (1 - s) * 60 * u * (i % 2 ? -1 : 1), y);
+        g.fillStyle = i === 3 ? ACCENT : PAPER;
+        g.font = `700 ${16 * u}px ${DISPLAY}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(w, 0, 0); g.restore();
+      });
+  }},
+  { from: G.beat(4), to: G.beat(8), draw(t) {               // one shape, never cut, morphs per beat
+      const k = [0, 1, 2, 3].map((i) => G.beat(i));
+      const w = trackFeel(t, [[0, 20 * u], [k[1], 70 * u], [k[2], 20 * u], [k[3], 80 * u]], 'snappy');
+      const h = trackFeel(t, [[0, 20 * u], [k[1], 12 * u], [k[2], 20 * u], [k[3], 45 * u]], 'snappy');
+      const r = trackFeel(t, [[0, 10 * u], [k[1], 6 * u], [k[2], 10 * u], [k[3], 3 * u]], 'base');
+      const grow = sp(t, 'snappy');
+      g.fillStyle = ACCENT; g.beginPath();
+      g.roundRect(L.cx - w * grow / 2, L.cy - h * grow / 2, w * grow, h * grow, r); g.fill();
+      const labels = ['', 'Get started', '', ''];
+      const i = Math.min(3, Math.floor(G.at(t)));
+      if (labels[i]) {
+        g.globalAlpha = M.swapAlpha(t, k[i], k[i + 1] ?? 99);
+        g.fillStyle = INK; g.font = `600 ${4.5 * u}px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(labels[i], L.cx, L.cy); g.globalAlpha = 1;
+      }
+      if (i >= 2) {                                           // loader arc inside the circle
+        const a = t * 9; g.strokeStyle = INK; g.lineWidth = 1.6 * u; g.lineCap = 'round';
+        g.globalAlpha = M.swapAlpha(t, k[2], k[3]);
+        g.beginPath(); g.arc(L.cx, L.cy, 5 * u, a, a + 4); g.stroke(); g.globalAlpha = 1;
+      }
+      if (i === 3) {                                          // bars grow inside the card
+        for (let b = 0; b < 7; b++) {
+          const s = sp(t - k[3] - 0.15 - b * 0.05, 'base'), bh = (10 + 25 * M.hash(b, 3)) * u * s;
+          g.fillStyle = INK; g.fillRect(L.cx - 32 * u + b * 9.5 * u, L.cy + 17 * u - bh, 6 * u, bh);
+        }
+      }
+  }},
+  { from: G.beat(8), to: G.bar(3), draw(t) {                // stagger grid resolving to a lockup
+      const r = rng(7), n = 6, cell = 12 * u, x0 = L.cx - (n - 1) * cell / 2, y0 = L.cy - (n - 1) * cell / 2;
+      for (let i = 0; i < n * n; i++) {
+        const cx = x0 + (i % n) * cell, cy = y0 + Math.floor(i / n) * cell;
+        const d = Math.hypot(i % n - 2.5, Math.floor(i / n) - 2.5);
+        const s = sp(t - d * 0.06 - r() * 0.05, 'snappy') * (1 - sp(t - G.beat(2) - d * 0.03, 'base'));
+        g.fillStyle = i % 7 ? PAPER : ACCENT;
+        g.fillRect(cx - 4.5 * u * s, cy - 4.5 * u * s, 9 * u * s, 9 * u * s);
+      }
+      const s = sp(t - G.beat(2.5), 'heavy');
+      g.globalAlpha = clamp(s * 2); g.fillStyle = PAPER; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = `700 ${11 * u * lerp(1.15, 1, s)}px ${DISPLAY}`; g.fillText('seek(t)', L.cx, L.cy); g.globalAlpha = 1;
+  }},
+];
+
+function draw(t) {
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = INK; g.fillRect(0, 0, W, H);
+  for (const s of SCENES) if (t >= s.from && t < s.to) { g.save(); s.draw(t - s.from); g.restore(); }
+}
+window.seek = (t) => { draw(t); return true; };
+
+// Live preview in a normal browser only. Headless render drives seek() itself.
+if (!navigator.webdriver) {
+  const t0 = performance.now();
+  (function loop() { draw(((performance.now() - t0) / 1000) % FILM.dur); requestAnimationFrame(loop); })();
+}
+</script>
