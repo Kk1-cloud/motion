@@ -35,6 +35,23 @@ overstated, it says so below.
 - Every 2-4 s something new happens. Hook in 2 s. No technique twice in a row.
 - Scene boundaries on beats, not round seconds.
 
+## RTL / Persian / Arabic
+- Load fonts explicitly (`M.loadFonts`, assign to `window.FILM_READY`). Canvas never triggers
+  @font-face loading, so text silently renders in a fallback font. `render.mjs` awaits it.
+- Load both the arabic and latin subsets with unicode ranges: mixed lines ("منبع: Startup Genome")
+  need both. Use `M.text(..., {dir: 'rtl', align: 'right'})`; canvas handles shaping and bidi.
+- Persian digits and ٪ via `M.faDigits`. Draw arrows, checks and crosses as shapes: most Persian
+  fonts lack ↑ ↓ ✅ ❌ glyphs, and emoji break the look.
+- Reels/TikTok put action buttons on the RIGHT, exactly where RTL text is anchored. Use
+  `M.safeRect(W, H, 'reels')` and preview with `--q safe` if the film draws the overlay.
+- "Clean, ease-out, no bounce" = critically damped springs (`calm`, `crisp`), never `snappy`.
+
+## Series and VO-first work
+- Put everything reused across episodes (palette, motif, icons, end card, crack positions) in a
+  per-series kit file that every episode loads unchanged. Seeded shapes stay identical.
+- Keep all scene and word timings in one constants object at the top. When the voice-over arrives,
+  retiming is editing that object, not hunting through draw code.
+
 ## Sound
 - If a track is supplied, measure it (beats, downbeats, onset hits) and cut to it.
 - Otherwise synthesize score and SFX on the same timeline as the picture. Sound is where

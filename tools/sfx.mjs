@@ -1,5 +1,6 @@
 // node tools/sfx.mjs cues.json out/sfx.wav [duration]
-// cues: [{"t":0.5,"type":"click","gain":1,"pan":0}, ...]  types: click pop thump whoosh riser tick swell
+// cues: [{"t":0.5,"type":"click","gain":1,"pan":0}, ...]
+// types: click pop thump whoosh riser tick swell crack stamp count clock chime
 import { readFileSync } from 'node:fs';
 import { SR, writeWav, noiseGen } from './wav.mjs';
 const cues = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -16,6 +17,15 @@ export const VOICES = {
   whoosh: [0.35, (t) => noise() * Math.sin(Math.PI * Math.min(1, t / 0.35)) * 0.25],
   riser:  [1.00, (t) => noise() * t * t * 0.3 + Math.sin(TAU * (200 * t + 300 * t * t)) * t * 0.08],
   swell:  [1.20, (t) => Math.sin(TAU * 220 * t) * Math.sin(Math.PI * t / 1.2) * 0.15],
+  // Dry split: noise transient + a few inharmonic partials. Glass/ice crack, not an explosion.
+  crack:  [0.35, (t) => (noise() * Math.exp(-t * 70) * 0.6
+    + [2130, 3370, 4710].reduce((a, f, i) => a + Math.sin(TAU * f * t) * Math.exp(-t * (40 + 15 * i)), 0) * 0.08
+    + noise() * Math.exp(-((t - 0.045) ** 2) * 4e4) * 0.35)],
+  // Low stamp: pitched thump plus a short papery slap.
+  stamp:  [0.60, (t) => Math.sin(TAU * (70 * t - 18 * t * t)) * Math.exp(-t * 7) * 0.9 + noise() * Math.exp(-t * 45) * 0.25],
+  count:  [0.02, (t) => Math.sin(TAU * 2600 * t) * Math.exp(-t * 300) * 0.25],   // counter digit tick
+  clock:  [0.04, (t) => (noise() * 0.5 + Math.sin(TAU * 3100 * t)) * Math.exp(-t * 160) * 0.35], // mechanical tick
+  chime:  [1.20, (t) => [880, 1320, 1760].reduce((a, f, i) => a + Math.sin(TAU * f * t) / (i + 1), 0) * Math.exp(-t * 4) * 0.12],
 };
 for (const c of cues) {
   const [len, fn] = VOICES[c.type] || (() => { throw new Error('unknown sfx ' + c.type); })();

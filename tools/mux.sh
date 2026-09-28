@@ -10,7 +10,13 @@ for a in "$D/audio/score.wav" "$D/audio/track.wav" "$D/out/sfx.wav"; do
   [ -f "$a" ] && { IN+=(-i "$a"); N=$((N+1)); MIX+="[$N:a]"; }
 done
 [ "$N" -eq 0 ] && { echo "no audio in $D/audio or $D/out/sfx.wav"; exit 1; }
+# Two-pass loudnorm: pass 1 measures, pass 2 applies a linear gain. Single-pass (dynamic) mode
+# misses the target by 1-2 LU on short, dynamic mixes and can overshoot true peak after AAC.
+PRE="${MIX}amix=inputs=$N:normalize=0"
+M=$("$FF" -hide_banner "${IN[@]}" -filter_complex "$PRE,loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json" -f null - 2>&1 | sed -n '/^{/,/^}/p')
+g() { echo "$M" | sed -n "s/.*\"$1\" : \"\([^\"]*\)\".*/\1/p"; }
+LN="loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true"
 "$FF" -y -loglevel error "${IN[@]}" \
-  -filter_complex "${MIX}amix=inputs=$N:normalize=0,loudnorm=I=-14:TP=-1:LRA=11[a]" \
-  -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 256k -ar 48000 -shortest -movflags +faststart "$D/out/final.mp4"
+  -filter_complex "$PRE,$LN,aresample=48000[a]" \
+  -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 256k -shortest -movflags +faststart "$D/out/final.mp4"
 echo "-> $D/out/final.mp4"

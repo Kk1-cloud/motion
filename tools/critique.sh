@@ -22,4 +22,4 @@ fi
 "$FF" -y -loglevel error -i "$O/_first.png" -i "$O/_last.png" -filter_complex hstack "$O/seam.png"
 rm -f "$O/_first.png" "$O/_last.png"
 echo "look at: $O/contact.png $O/phone.png $O/seam.png ${T:+$O/strip.png}"
-echo "then score with prompts/critique-pass.md and log to $D/review_log.md"
+echo "then score with the critique-pass skill and log to $D/review_log.md"

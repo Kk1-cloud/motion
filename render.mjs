@@ -7,6 +7,7 @@
 //   node render.mjs films/demo/index.html --stills 0,1.5,3    PNGs at given times
 //
 // Flags: --fps --sub (subframes blended for motion blur) --dur --w --h --out --crf
+//        --q 'safe&debug=1'  extra query params passed to the film (e.g. a safe-zone overlay)
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -37,13 +38,14 @@ const base = `http://127.0.0.1:${server.address().port}/`;
 const q = new URLSearchParams();
 if (opt('w')) q.set('w', opt('w'));
 if (opt('h')) q.set('h', opt('h'));
+for (const p of (opt('q') || '').split('&').filter(Boolean)) { const [k, v = ''] = p.split('='); q.set(k, v); }
 const url = base + relative(ROOT, resolve(film)).split('\\').join('/') + (q.size ? '?' + q : '');
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
 page.on('pageerror', (e) => { console.error('page error:', e.message); process.exitCode = 1; });
 await page.goto(url);
-await page.evaluate(() => document.fonts.ready);
+await page.evaluate(async () => { await window.FILM_READY; await document.fonts.ready; });
 const F = await page.evaluate(() => {
   const c = document.querySelector('canvas');
   return { ...(window.FILM || {}), w: c.width, h: c.height, hasSeek: typeof window.seek === 'function' };

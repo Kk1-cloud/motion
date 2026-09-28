@@ -5,3 +5,6 @@ out/
 *.wav
 !audio/*.wav
 *.whl
+# Films are client/project work: only the starter is tracked
+films/*
+!films/_starter/
