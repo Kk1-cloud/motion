@@ -1,6 +1,6 @@
 // node tools/sfx.mjs cues.json out/sfx.wav [duration]
 // cues: [{"t":0.5,"type":"click","gain":1,"pan":0}, ...]
-// types: click pop thump whoosh riser tick swell crack stamp count clock chime
+// types: click pop thump whoosh riser tick swell crack stamp count clock chime coin coin_rev lock
 import { readFileSync } from 'node:fs';
 import { SR, writeWav, noiseGen } from './wav.mjs';
 const cues = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -26,7 +26,18 @@ export const VOICES = {
   count:  [0.02, (t) => Math.sin(TAU * 2600 * t) * Math.exp(-t * 300) * 0.25],   // counter digit tick
   clock:  [0.04, (t) => (noise() * 0.5 + Math.sin(TAU * 3100 * t)) * Math.exp(-t * 160) * 0.35], // mechanical tick
   chime:  [1.20, (t) => [880, 1320, 1760].reduce((a, f, i) => a + Math.sin(TAU * f * t) / (i + 1), 0) * Math.exp(-t * 4) * 0.12],
+  // Coin: short metallic ring (inharmonic partials). coin_rev plays the same ring backwards.
+  coin:     [0.45, (t) => coinRing(t)],
+  coin_rev: [0.45, (t) => coinRing(0.45 - t) * Math.min(1, (0.45 - t) * 40)],
+  // Lock: two quick mechanical clicks, low body.
+  lock:   [0.20, (t) => [0, 0.07].reduce((a, o) => a + (t >= o ? (noise() * 0.6 + Math.sin(TAU * 1400 * (t - o))) * Math.exp(-(t - o) * 180) : 0), 0) * 0.4
+    + Math.sin(TAU * 160 * t) * Math.exp(-t * 30) * 0.3],
 };
+function coinRing(t) {
+  if (t < 0) return 0;
+  return [2350, 3890, 5610, 7020].reduce((a, f, i) => a + Math.sin(TAU * f * t) * Math.exp(-t * (9 + 6 * i)) / (i + 1), 0) * 0.22
+    + Math.sin(TAU * 1180 * t) * Math.exp(-t * 60) * 0.15;
+}
 for (const c of cues) {
   const [len, fn] = VOICES[c.type] || (() => { throw new Error('unknown sfx ' + c.type); })();
   const start = Math.floor(c.t * SR), gain = c.gain ?? 1, pan = c.pan ?? 0;
