@@ -1,6 +1,6 @@
 // node tools/sfx.mjs cues.json out/sfx.wav [duration]
 // cues: [{"t":0.5,"type":"click","gain":1,"pan":0}, ...]
-// types: click pop thump whoosh riser tick swell crack stamp count clock chime coin coin_rev lock
+// types: click pop thump whoosh riser tick swell crack stamp count clock chime coin coin_rev lock ding horn slide
 import { readFileSync } from 'node:fs';
 import { SR, writeWav, noiseGen } from './wav.mjs';
 const cues = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -29,6 +29,12 @@ export const VOICES = {
   // Coin: short metallic ring (inharmonic partials). coin_rev plays the same ring backwards.
   coin:     [0.45, (t) => coinRing(t)],
   coin_rev: [0.45, (t) => coinRing(0.45 - t) * Math.min(1, (0.45 - t) * 40)],
+  // Notification ding: two bell partials. Generic, not any real OS sound.
+  ding:   [0.60, (t) => (Math.sin(TAU * 1320 * t) * 0.6 + Math.sin(TAU * 1980 * t) * 0.3) * Math.exp(-t * 9) * Math.min(1, t * 400) * 0.35],
+  // Short, tired car horn: two detuned low square-ish tones with a sagging envelope.
+  horn:   [0.55, (t) => [311, 392].reduce((a, fr) => a + Math.tanh(3 * Math.sin(TAU * fr * (1 - 0.03 * t) * t)), 0) * Math.min(1, t * 60, (0.55 - t) * 8) * 0.12],
+  // Block slide: dry friction noise with a soft stop.
+  slide:  [0.40, (t) => noise() * Math.sin(Math.PI * Math.min(1, t / 0.32)) * 0.18 + (t > 0.3 ? Math.sin(TAU * 120 * (t - 0.3)) * Math.exp(-(t - 0.3) * 40) * 0.4 : 0)],
   // Lock: two quick mechanical clicks, low body.
   lock:   [0.20, (t) => [0, 0.07].reduce((a, o) => a + (t >= o ? (noise() * 0.6 + Math.sin(TAU * 1400 * (t - o))) * Math.exp(-(t - o) * 180) : 0), 0) * 0.4
     + Math.sin(TAU * 160 * t) * Math.exp(-t * 30) * 0.3],
