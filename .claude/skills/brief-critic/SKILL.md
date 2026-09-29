@@ -41,6 +41,11 @@ Check for each; quote the offending words from the user's brief:
 - **Sound as afterthought**: no BPM, so cuts can't land on anything.
 - **Logo-at-the-end syndrome**: the ending is branding, not an action or a payoff.
 - **No gate**: asks for a final MP4 in one go with no stills or shot-list check.
+- **Fragment captions**: on-screen lines copied from a VO script lose the words the voice supplied.
+  Read every on-screen line with the sound OFF: who does it (subject), to what (object), and is there
+  a verb? "Today you pay. Months later you get." fails (pay what?). "They don't die of low sales"
+  fails (who?). Rewrite each as a complete sentence before building. A heading on screen can serve
+  as the subject of the line under it.
 - **Framework micromanagement**: dictates a library instead of the look, when reuse doesn't need it.
 
 ## 3. Output format (always this order)

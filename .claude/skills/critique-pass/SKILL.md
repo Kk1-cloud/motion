@@ -32,7 +32,9 @@ and a handful of `out/stills/*.png` with the Read tool. Do not score from the co
 Text overlapping during swaps · anything sliding at constant speed · corner labels and frame borders ·
 centered-on-gradient shots · blurry scaled text · a beat with nothing happening · a stutter at the
 loop seam · text inside a container visible before the container finished growing · two shots in a
-row with the same move · colors outside the palette · safe-area violations in 9:16 (top 12u, bottom 12u).
+row with the same move · colors outside the palette · safe-area violations in 9:16 (top 12u, bottom 12u) · on-screen sentences
+missing a subject, object or verb when read with the sound off · a wrapped line that leaves one word
+alone (break at the comma or shrink the type instead).
 
 ## 4. Log, fix, repeat
 Append to `films/<name>/review_log.md`:
