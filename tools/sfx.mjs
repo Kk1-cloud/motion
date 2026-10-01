@@ -1,6 +1,6 @@
 // node tools/sfx.mjs cues.json out/sfx.wav [duration]
 // cues: [{"t":0.5,"type":"click","gain":1,"pan":0}, ...]
-// types: click pop thump whoosh riser tick swell crack stamp count clock chime coin coin_rev lock ding horn slide
+// types: click pop thump whoosh riser tick swell crack stamp count clock chime coin coin_rev lock ding horn slide print tear beep creak
 import { readFileSync } from 'node:fs';
 import { SR, writeWav, noiseGen } from './wav.mjs';
 const cues = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -35,6 +35,14 @@ export const VOICES = {
   horn:   [0.55, (t) => [311, 392].reduce((a, fr) => a + Math.tanh(3 * Math.sin(TAU * fr * (1 - 0.03 * t) * t)), 0) * Math.min(1, t * 60, (0.55 - t) * 8) * 0.12],
   // Block slide: dry friction noise with a soft stop.
   slide:  [0.40, (t) => noise() * Math.sin(Math.PI * Math.min(1, t / 0.32)) * 0.18 + (t > 0.3 ? Math.sin(TAU * 120 * (t - 0.3)) * Math.exp(-(t - 0.3) * 40) * 0.4 : 0)],
+  // Ticket printer: fast mechanical stepping under a short whir.
+  print:  [0.90, (t) => (noise() * 0.3 * (Math.sin(TAU * 38 * t) > 0.6 ? 1 : 0.15) + Math.sin(TAU * 180 * t) * 0.1) * Math.min(1, t * 30, (0.9 - t) * 12)],
+  // Paper tear: crackling noise bursts that thin out.
+  tear:   [0.45, (t) => noise() * (0.5 + 0.5 * Math.sin(TAU * 90 * t + noise())) * Math.exp(-t * 6) * Math.min(1, t * 300) * 0.5],
+  // Scanner beep: short clean sine with a soft edge.
+  beep:   [0.18, (t) => Math.sin(TAU * 1760 * t) * Math.min(1, t * 200, (0.18 - t) * 60) * 0.22],
+  // Creak: slow, low, rasping (a scale settling).
+  creak:  [0.50, (t) => Math.sin(TAU * (140 - 40 * t) * t + 3 * Math.sin(TAU * 23 * t)) * noise() * Math.sin(Math.PI * t / 0.5) * 0.35],
   // Lock: two quick mechanical clicks, low body.
   lock:   [0.20, (t) => [0, 0.07].reduce((a, o) => a + (t >= o ? (noise() * 0.6 + Math.sin(TAU * 1400 * (t - o))) * Math.exp(-(t - o) * 180) : 0), 0) * 0.4
     + Math.sin(TAU * 160 * t) * Math.exp(-t * 30) * 0.3],
