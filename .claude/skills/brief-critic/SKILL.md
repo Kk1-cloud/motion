@@ -46,6 +46,13 @@ Check for each; quote the offending words from the user's brief:
   a verb? "Today you pay. Months later you get." fails (pay what?). "They don't die of low sales"
   fails (who?). Rewrite each as a complete sentence before building. A heading on screen can serve
   as the subject of the line under it.
+- **Calques**: lines that read as word-for-word translations from English ("if demand doubles, where
+  does it break first" -> «اگر تقاضا دو برابر شود، اول کجا می‌شکند»; "the starting point of reforms").
+  Rewrite in the audience's own words (the owner says «سفارش», not «تقاضای بازار») and prefer the
+  language's own idioms («ترک برمی‌دارد»), ideally one that echoes the film's visual motif.
+- **Bare surnames**: a surname alone may not register with this audience («ماسک»). First use = full name.
+- **Hook about the example, not the viewer**: frame one should ask the viewer about their own business;
+  the case study is evidence that follows, and the question stays open until the film answers it.
 - **Framework micromanagement**: dictates a library instead of the look, when reuse doesn't need it.
 
 ## 3. Output format (always this order)
