@@ -8,6 +8,7 @@ const dur = Number(process.argv[4]) || Math.max(...cues.map((c) => c.t)) + 2;
 const L = new Float32Array(Math.ceil(dur * SR)), R = new Float32Array(L.length);
 const noise = noiseGen(7);
 const TAU = 2 * Math.PI;
+let sz = 0; const soft = () => (sz += (noise() - sz) * 0.12);   // one-pole low-passed noise
 // [length s, fn(t) -> sample]. Keep them short and dry; the score carries the space.
 export const VOICES = {
   click:  [0.05, (t) => Math.sin(TAU * 1800 * t) * Math.exp(-t * 90) * 0.5],
@@ -42,7 +43,8 @@ export const VOICES = {
   // Scanner beep: short clean sine with a soft edge.
   beep:   [0.18, (t) => Math.sin(TAU * 1760 * t) * Math.min(1, t * 200, (0.18 - t) * 60) * 0.22],
   // Creak: slow, low, rasping (a scale settling).
-  creak:  [0.50, (t) => Math.sin(TAU * (140 - 40 * t) * t + 3 * Math.sin(TAU * 23 * t)) * noise() * Math.sin(Math.PI * t / 0.5) * 0.35],
+  // Low-passed noise: full-band noise times an FM tone is harsh, and AAC overshoots on it (measured +5 dB).
+  creak:  [0.50, (t) => Math.sin(TAU * (140 - 40 * t) * t + 3 * Math.sin(TAU * 23 * t)) * soft() * Math.sin(Math.PI * t / 0.5) * 0.9],
   // Lock: two quick mechanical clicks, low body.
   lock:   [0.20, (t) => [0, 0.07].reduce((a, o) => a + (t >= o ? (noise() * 0.6 + Math.sin(TAU * 1400 * (t - o))) * Math.exp(-(t - o) * 180) : 0), 0) * 0.4
     + Math.sin(TAU * 160 * t) * Math.exp(-t * 30) * 0.3],

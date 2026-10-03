@@ -12,11 +12,14 @@ done
 [ "$N" -eq 0 ] && { echo "no audio in $D/audio or $D/out/sfx.wav"; exit 1; }
 # Two-pass loudnorm: pass 1 measures, pass 2 applies a linear gain. Single-pass (dynamic) mode
 # misses the target by 1-2 LU on short, dynamic mixes and can overshoot true peak after AAC.
+# A limiter after it (-1.5 dBFS) catches transients when loudnorm falls back to dynamic mode (wide LRA).
+# ffmpeg's default "fast" AAC coder can still overshoot by 1.5 dB on noisy, bright sounds (measured: a
+# limited -1.5 dBFS creak decoded at 0 dBFS); the twoloop coder holds the ceiling.
 PRE="${MIX}amix=inputs=$N:normalize=0"
 M=$("$FF" -hide_banner "${IN[@]}" -filter_complex "$PRE,loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json" -f null - 2>&1 | sed -n '/^{/,/^}/p')
 g() { echo "$M" | sed -n "s/.*\"$1\" : \"\([^\"]*\)\".*/\1/p"; }
 LN="loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true"
 "$FF" -y -loglevel error "${IN[@]}" \
-  -filter_complex "$PRE,$LN,aresample=48000[a]" \
-  -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 256k -shortest -movflags +faststart "$D/out/final.mp4"
+  -filter_complex "$PRE,$LN,alimiter=limit=0.84:attack=2:release=60:level=false,aresample=48000[a]" \
+  -map 0:v -map "[a]" -c:v copy -c:a aac -aac_coder twoloop -b:a 320k -shortest -movflags +faststart "$D/out/final.mp4"
 echo "-> $D/out/final.mp4"
