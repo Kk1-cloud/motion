@@ -18,7 +18,7 @@ UNKNOWN and ask.
 | 2 | Audience + channel | none | who watches, where (X feed, TikTok, landing hero, pitch), sound on/off |
 | 3 | Hook | none | the literal image of the first 2 seconds |
 | 4 | Content truth | invented UI, vague claims | real URL/screenshots/assets, one real metric |
-| 5 | Reference | none, or "modern/clean/sleek" | a named style, a frame, a video, or an image folder, with take/don't-take |
+| 5 | Reference | none, or "modern/clean/sleek" | a named style (one of `styles/`, or a frame, video or image folder) plus a benchmark work, with take/don't-take |
 | 6 | Structure | none | state list or beat sheet, 2-4 s per beat, on a BPM |
 | 7 | Constraints | none | duration, formats (9:16/1:1/16:9), palette, fonts, one accent, banned looks |
 | 8 | Sound | "add music" | supplied track, or BPM + genre + what hits where |
@@ -53,6 +53,15 @@ Check for each; quote the offending words from the user's brief:
 - **Bare surnames**: a surname alone may not register with this audience («ماسک»). First use = full name.
 - **Hook about the example, not the viewer**: frame one should ask the viewer about their own business;
   the case study is evidence that follows, and the question stays open until the film answers it.
+- **No style, or a vibe instead of one**: no medium named. Offer 2-3 fitting styles from
+  `styles/CATALOG.md` (check `uses` in each `style.json`) and say why each fits THIS topic.
+- **Style as costume**: the brief names a style but describes that style's demo (its story, its props,
+  its opening) instead of the user's topic. Output will be the demo with new words. The style is fixed;
+  story, structure and shots come from the topic.
+- **Unsupported style**: three.js or WebGL-post styles (see `styles/README.md`) are untested here. Say
+  so before the user falls in love with one.
+- **Wall of text**: on-screen copy that can't be read in the time given. Rule of thumb: chars / 15 + 1.5 s
+  per Latin line, chars / 4.5 + 1.5 s per Chinese line. A 30 s film holds far fewer words than people think.
 - **Framework micromanagement**: dictates a library instead of the look, when reuse doesn't need it.
 
 ## 3. Output format (always this order)
@@ -66,6 +75,7 @@ Check for each; quote the offending words from the user's brief:
    - product / launch → `prompts/brand-reel.md`
    - UI story, one element morphing → `prompts/state-spec.xml`
    - style from a reference → `prompts/reference-extract.md`
+   - a film in one of the library styles → `prompts/style-film.md`
    - long form, music video, overnight → `prompts/director-brief.md`
 5. **What would still make it fail**: the one remaining risk even after the rewrite.
 

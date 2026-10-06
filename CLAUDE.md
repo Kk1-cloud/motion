@@ -2,6 +2,7 @@
 
 This repo is a motion design studio where every film is a program. Claude writes `films/<name>/index.html`,
 `render.mjs` turns it into frames, ffmpeg turns frames into MP4. Read `docs/KNOWLEDGE.md` once per session.
+`styles/` holds 43 imported film styles (Lemo-Opuscar, MIT); `styles/README.md` maps their contract onto ours.
 
 ## 0. Critique the ask before building anything
 The user wants a harsh motion director, not a yes-man. On every new film request, run the
@@ -34,9 +35,12 @@ Only skip the critique if the user says "just build it", and even then list the 
 - Hits land on measured beats. Final mix is -14 LUFS (`tools/mux.sh`).
 
 ## 4. Gates (do not skip)
-1. `films/<name>/brief.md` (after brief-critic) and `shotlist.md` on the beat grid. Show the shot list.
+1. `films/<name>/brief.md` (after brief-critic), `treatment.md` (benchmark, 3 candidate structures,
+   sound design table; written before reading any style's `DEMO.md`), and `shotlist.md` on the beat grid.
+   Show the shot list. Library style: 3 style frames from the real drawing code first.
 2. Stills: `node render.mjs films/<name>/index.html --stills beats`. LOOK at them.
 3. Low-res animatic (`--w 540 --h 960 --fps 30 --sub 1`) to fix pacing before polish.
+   `node tools/readcheck.mjs films/<name>/index.html` exits 0 (films define `window.TEXTS(t)`).
 4. Full render, then `bash tools/critique.sh films/<name>` and run the `critique-pass` skill.
 5. Fix the 3 worst problems, re-render only the affected seconds (`--from --to`). Repeat until every
    score is 8+. Minimum 2 rounds. Log every round in `films/<name>/review_log.md`.

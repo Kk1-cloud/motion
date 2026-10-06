@@ -81,6 +81,21 @@ function draw(t) {
 }
 window.seek = (t) => { draw(t); return true; };
 
+// Every text on screen at t, for tools/readcheck.mjs (can the viewer read it before it leaves?).
+// Report the full text from its first visible frame, with its box in canvas pixels.
+const box = (id, text, font, x, y) => {
+  g.font = font; const w = g.measureText(text).width, h = parseFloat(font.match(/([\d.]+)px/)[1]);
+  return { id, text, x0: x - w / 2, y0: y - h / 2, x1: x + w / 2, y1: y + h / 2 };
+};
+window.TEXTS = (t) => {
+  const out = [];
+  if (t < G.beat(4)) ['CODE', 'IS', 'THE', 'CAMERA'].forEach((w, i) =>          // words slide in from the side
+    out.push(box('hook' + i, w, `700 ${16 * u}px ${DISPLAY}`, L.cx - (1 - sp(t - G.beat(i) * 0.5, 'heavy')) * 60 * u * (i % 2 ? -1 : 1), L.cy + (i - 1.5) * 17 * u)));
+  else if (t < G.beat(8) && Math.floor(G.at(t - G.beat(4))) === 1) out.push(box('cta', 'Get started', `600 ${4.5 * u}px ${UI}`, L.cx, L.cy));
+  else if (t >= G.beat(8) + G.beat(2.5)) out.push(box('end', 'seek(t)', `700 ${11 * u}px ${DISPLAY}`, L.cx, L.cy));
+  return out;
+};
+
 // Live preview in a normal browser only. Headless render drives seek() itself.
 if (!navigator.webdriver) {
   const t0 = performance.now();

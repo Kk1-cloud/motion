@@ -21,5 +21,8 @@ fi
 "$FF" -y -loglevel error -sseof -0.05 -i "$V" -vf "scale=360:-1" -update 1 -frames:v 1 "$O/_last.png"
 "$FF" -y -loglevel error -i "$O/_first.png" -i "$O/_last.png" -filter_complex hstack "$O/seam.png"
 rm -f "$O/_first.png" "$O/_last.png"
+# Blank frames: transitions that drop to black for a few frames hide between contact-sheet samples.
+BLACK=$("$FF" -hide_banner -i "$V" -vf "blackdetect=d=0.04:pix_th=0.06" -an -f null - 2>&1 | grep -o 'black_start:[^ ]* black_end:[^ ]*' || true)
+if [ -n "$BLACK" ]; then echo "BLACK FRAMES (check each is intended):"; echo "$BLACK"; else echo "no black runs >= 0.04s"; fi
 echo "look at: $O/contact.png $O/phone.png $O/seam.png ${T:+$O/strip.png}"
 echo "then score with the critique-pass skill and log to $D/review_log.md"

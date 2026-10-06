@@ -8,6 +8,7 @@
     "render": "node render.mjs",
     "stills": "node render.mjs --stills beats",
     "critique": "bash tools/critique.sh",
+    "readcheck": "node tools/readcheck.mjs",
     "score": "node tools/score.mjs",
     "sfx": "node tools/sfx.mjs",
     "mux": "bash tools/mux.sh"

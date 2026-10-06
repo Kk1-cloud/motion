@@ -19,7 +19,17 @@ the one metric or payoff. Missing ones get a labeled default, never a silent gue
 1. `npm run new -- <name>`. Write `films/<name>/brief.md` (final brief after critique).
 2. Assets: if there is a URL, capture real screenshots, logo, colors, fonts with Playwright into
    `films/<name>/assets/`. List what you found. Never redraw UI from imagination.
-3. Reference: if one exists, extract frames (`ffmpeg -i ref.mp4 -vf fps=2 refs/frames/%03d.png`),
+3. Style and treatment. If the brief names a library style, read `styles/<slug>/STYLE.md` and
+   `styles/README.md` (how their contract maps onto ours). Then, BEFORE opening that style's `DEMO.md`,
+   write `films/<name>/treatment.md`: a benchmark (1-2 real works: learn / don't take), three candidate
+   structures and why one wins, logline and arc (one subject, one goal, one turn), the native move at the
+   peak, a sound design table (ambience / foley / music per section, two silences, two sound
+   transitions). Only then read `DEMO.md` and, if you need its code, `bash tools/fetch-style.sh <slug>`.
+   Compare with the demo on structure, opening, signature shot, camera path, score shape, ending:
+   at least four of six must differ.
+   Style frames: render 3 stills of the real drawing code (one is the signature shot) and check them
+   against `STYLE.md` before the shot list.
+   Reference (non-library): if one exists, extract frames (`ffmpeg -i ref.mp4 -vf fps=2 refs/frames/%03d.png`),
    look at them, write `films/<name>/style_guide.md` (palette hex, type family/weight/tracking, shot
    lengths, transition types, camera moves, texture, how text enters/exits). Take the grammar, never
    the content, logos or characters.
@@ -28,7 +38,10 @@ the one metric or payoff. Missing ones get a labeled default, never a silent gue
 5. `films/<name>/shotlist.md` on the beat grid: for every shot, beat range, image, camera, text,
    technique, SFX. Hook in the first 2 s, new payoff every 2-4 s, no technique twice in a row. Show it.
 6. Build `index.html` with `window.seek(t)`, springs from `lib/motion.js`, layout units, scene
-   boundaries on `G.beat()`. Read `beats.json` if timings come from a measured track.
+   boundaries on `G.beat()`. Read `beats.json` if timings come from a measured track. Define
+   `window.TEXTS(t)` (see `films/_starter`) and run `node tools/readcheck.mjs films/<name>/index.html`
+   (add `--safe reels` etc. for vertical social). Exit 0 before any full render; exit 2 is not a pass.
+   Anything that follows a subject goes through one world-to-screen function.
 7. Stills → animatic → full render (see CLAUDE.md gates). Then `critique-pass`, 2+ rounds, until 8+.
 8. SFX: write `films/<name>/cues.json` from the shot list (clicks on UI actions, thumps on downbeats,
    whooshes on camera moves). `node tools/sfx.mjs films/<name>/cues.json films/<name>/out/sfx.wav <dur>`.
@@ -47,6 +60,9 @@ the one metric or payoff. Missing ones get a labeled default, never a silent gue
 - Camera: a slow push (1.00 → 1.06) over a held shot beats a static frame. Never scale text with
   CSS `will-change` (blurry).
 - Motion blur via subframes (`--sub 4`) on fast moves; stills for critique use `--sub 1`.
+- One signature shot per film: a oner, a scale reveal, or a transition made from the medium itself.
+- At least four different camera moves across the film; one acceleration and one held breath.
+- Silence before the turn; the first sound after it is one of the most important in the film.
 
 ## Hard rules
 - Real product UI only. No Math.random, timers or CSS transitions in render mode.

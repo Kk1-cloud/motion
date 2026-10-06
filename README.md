@@ -25,7 +25,9 @@ node render.mjs films/my-film/index.html --w 1080 --h 1080      # same timeline,
 node render.mjs films/my-film/index.html --from 4 --to 6        # re-render a slice
 node tools/sfx.mjs films/my-film/cues.json films/my-film/out/sfx.wav 16
 bash tools/mux.sh films/my-film                                 # -> out/final.mp4 at -14 LUFS
-bash tools/critique.sh films/my-film "" 4.2                     # contact / phone / seam / strip sheets
+bash tools/critique.sh films/my-film "" 4.2                     # contact / phone / seam / strip sheets + black frames
+node tools/readcheck.mjs films/my-film/index.html --safe reels  # every text on screen long enough to read
+bash tools/fetch-style.sh swiss-motion                          # read a style's demo code (into refs/)
 ```
 Open `films/_starter/index.html` in a normal browser for a live looping preview.
 
@@ -34,8 +36,10 @@ Open `films/_starter/index.html` in a normal browser for a live looping preview.
 |------|------|
 | `CLAUDE.md` | House rules: render contract, banned looks, gates |
 | `docs/KNOWLEDGE.md` | What was learned, and where the source article is wrong |
+| `docs/GUIDE.md` | For the person asking: how to brief for a better film |
+| `styles/` | 43 film styles (STYLE.md rules + DEMO.md notes) from Lemo-Opuscar, MIT |
 | `.claude/skills/` | `brief-critic`, `motion-reel`, `critique-pass` |
-| `prompts/` | One-liner, brand reel, state spec, reference, director's brief templates |
+| `prompts/` | One-liner, brand reel, state spec, reference, library style, director's brief templates |
 | `lib/motion.js` | Springs, track, indicator, swapAlpha, seeded rng, beat grid, layout units |
 | `render.mjs` | Deterministic renderer (video, slices, stills, any format) |
 | `tools/` | score synth, sfx, beat analysis, mux, critique sheets |
