@@ -1,0 +1,122 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>fa starter</title>
+<style>html,body{margin:0;background:#141413;overflow:hidden}canvas{display:block;max-width:100vw;max-height:100vh}</style>
+<canvas id="c"></canvas>
+<script src="../../lib/motion.js"></script>
+<script src="../../lib/persian.js"></script>
+<script src="glyphs.js"></script>
+<script>
+// Persian starter: technique 07 "dots last" (.claude/skills/persian-motion). Copy with: npm run new -- <name> --fa
+// Live text (M.text) for the caption, shaped outlines (glyphs.js) for the title so bodies and dots
+// move separately without breaking a join. Re-shape after editing lines.tsv:
+//   python3 tools/shape_persian.py lib/fonts/Vazirmatn-VF.ttf --lines films/<name>/lines.tsv --global films/<name>/glyphs.js
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const { clamp, sp, spOut, spring, layout, grid } = M;
+const L = layout(W, H), u = L.u;
+const BPM = 120, G = grid({ bpm: BPM, offset: 0 });
+window.FILM = { dur: G.beat(15), fps: 60, w: W, h: H, bpm: BPM };
+
+const cv = document.getElementById('c'); cv.width = W; cv.height = H;
+const g = cv.getContext('2d');
+const INK = '#141413', PAPER = '#F0EEE6', MUTED = '#8A877F', ACCENT = '#D97757';
+const FA = 'Vazirmatn';
+window.FILM_READY = M.loadFonts([{ family: FA, url: '../../lib/fonts/Vazirmatn-VF.woff2', weight: '100 900' }]);
+
+// All timings in one place (retiming = editing this object).
+const T = {
+  l1: -0.1,                 // line 1 words wipe in from the right; already moving on frame 1 (hook)
+  l2: G.beat(2),            // line 2
+  dots: G.beat(4),          // first dot lands; one dot per beat, right to left, line 1 first
+  cap: G.beat(4),           // caption: the rule the dots are obeying
+  exit: G.beat(13),         // dots lift away first, then words wipe out to the left
+};
+const WORD_GAP = 0.24, FALL = 0.3;
+
+const R1 = M.fa.run('l1'), R2 = M.fa.run('l2');
+// RTL lines anchor on the right edge, which in 9:16 is where Reels/TikTok put their buttons.
+const SAFE = L.portrait ? M.safeRect(W, H, 'reels') : { x0: L.safe.x, x1: W - L.safe.x };
+const RIGHT = SAFE.x1;
+const SIZE = Math.min(19 * u, (SAFE.x1 - SAFE.x0) * R1.upem / Math.max(R1.w, R2.w));
+const Y1 = H * 0.36, Y2 = Y1 + SIZE * 1.6;                   // upper third, not dead centre
+const CAP = 'هر نقطه روی یک ضرب می‌نشیند.', CAP_FONT = `500 ${4.6 * u}px ${FA}`, YC = H * 0.74;
+
+// Dots in reading order: line 1 before line 2, rightmost glyph first. Each lands on a beat.
+const DOTS = [];
+for (const [R, ri] of [[R1, 0], [R2, 1]])
+  for (const gl of [...R.glyphs].sort((a, b) => b.x - a.x))
+    for (const d of gl.dots) DOTS.push({ key: `${ri}:${gl.i}:${d.j}`, up: d.b[1] > 0 });
+DOTS.forEach((d, n) => { d.t = T.dots + G.beat(n); });
+const DOT_AT = Object.fromEntries(DOTS.map((d) => [d.key, d]));
+
+// Per-word right-to-left wipe in, left-ward wipe out. Words are whole: joins never break.
+function line(R, ri, y, tIn, t) {
+  const P = M.fa.place(R, RIGHT, y, SIZE);
+  R.words.forEach((w, k) => {
+    const p = sp(t - tIn - k * WORD_GAP, 'crisp');
+    const out = spOut(t, T.exit + 0.6 + k * 0.08, 'crisp');
+    if (p <= 0 || out >= 1) return;
+    g.save();
+    if (out > 0) { g.beginPath(); g.rect(P.px(w.x0), P.top - SIZE, (P.px(w.x1) - P.px(w.x0)) * (1 - out), P.bottom - P.top + 2 * SIZE); g.clip(); }
+    M.fa.wipe(g, P.px(w.x0), P.px(w.x1), P.top, P.bottom, p, SIZE);
+    const slide = (1 - p) * 2.2 * u;                          // type slides inside its mask, from the right
+    M.fa.draw(g, R, RIGHT, y, SIZE, {
+      fill: PAPER, dotFill: ACCENT,                          // the dots are the payoff: the one accent
+      glyph: (gl) => (w.idx.includes(gl.i) ? { dx: slide } : null),
+      dot: (d, gl) => dotPose(DOT_AT[`${ri}:${gl.i}:${d.j}`], t),
+    });
+    g.restore();
+  });
+}
+
+// A dot falls (dots under the line rise), lands exactly on its beat, squashes, settles.
+// Fall = time-reversed spring (accelerates into the hit); squash = underdamped spring.
+function dotPose(D, t) {
+  if (!D || t < D.t - FALL) return null;
+  const dir = D.up ? -1 : 1;
+  const ex = spOut(t, T.exit + 0.35, 'crisp');                // exit: dots lift away before the words go
+  if (t < D.t) {
+    const p = spOut(t, D.t, 'crisp');                         // 0 -> 1, fastest at the hit
+    return { dy: dir * (1 - p) * 9 * u, sy: 1 + 0.25 * (1 - p), sx: 1 - 0.12 * (1 - p), alpha: clamp(p * 3) };
+  }
+  const sq = 0.34 * (1 - spring(t - D.t, 1156, 32));          // 1 at the hit, rings out in ~0.2 s
+  return { dy: -ex * 7 * u, sy: 1 - sq, sx: 1 + sq * 0.6, alpha: 1 - ex };
+}
+
+function draw(t) {
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = INK; g.fillRect(0, 0, W, H);
+  const zoom = 1 + 0.04 * spring(t, 2, 2.83);                 // camera breathes during the hold
+  g.translate(RIGHT, Y1); g.scale(zoom, zoom); g.translate(-RIGHT, -Y1);
+  line(R1, 0, Y1, T.l1, t);
+  line(R2, 1, Y2, T.l2, t);
+  // Caption: live text, one line, revealed right to left on the beat the first dot lands.
+  const pc = sp(t - T.cap, 'calm'), oc = spOut(t, T.exit + 0.5, 'crisp');
+  if (pc > 0 && oc < 1) {
+    g.save(); g.font = CAP_FONT;
+    const cw = g.measureText(CAP).width;
+    M.fa.wipe(g, RIGHT - cw, RIGHT, YC - 4.6 * u, YC + 4.6 * u, pc * (1 - oc), 4.6 * u);
+    M.text(g, CAP, RIGHT, YC, { font: CAP_FONT, color: MUTED, dir: 'rtl', align: 'right' });
+    g.restore();
+  }
+}
+window.seek = (t) => { draw(t); return true; };
+
+// Every text on screen at t, for tools/readcheck.mjs. Full text from its first visible frame.
+window.TEXTS = (t) => {
+  const out = [];
+  if (t > T.l1 + 0.2 && t < T.exit + 0.6) out.push(M.fa.box('l1', R1, RIGHT, Y1, SIZE));
+  if (t > T.l2 + 0.2 && t < T.exit + 0.6) out.push(M.fa.box('l2', R2, RIGHT, Y2, SIZE));
+  if (t > T.cap + 0.3 && t < T.exit + 0.3) {
+    g.font = CAP_FONT; const cw = g.measureText(CAP).width;
+    out.push({ id: 'cap', text: CAP, x0: RIGHT - cw, y0: YC - 3 * u, x1: RIGHT, y1: YC + 3 * u });
+  }
+  return out;
+};
+
+if (!navigator.webdriver) {
+  FILM_READY.then(() => { const t0 = performance.now();
+    (function loop() { draw(((performance.now() - t0) / 1000) % FILM.dur); requestAnimationFrame(loop); })(); });
+}
+</script>

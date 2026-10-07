@@ -30,6 +30,18 @@ everyone else's.
 Don't know which style? Ask: "suggest 3 styles from the library for <topic>, and which native move
 each would use at the peak." If the answer can't name a native move that fits, the style is wrong.
 
+## 2b. Persian films
+Write the request in Persian or English; any Persian on screen loads the `persian-motion` skill.
+Give it, or it will stop and ask:
+- **The final copy, written by you**, in one register (شما or تو). It will not invent your lines.
+- **The platform.** Reels and TikTok buttons sit on the right, where Persian lines start.
+- **One technique for the peak**, if you have a taste: «نقطه‌ها آخر» (dots land last, on the beat),
+  کشیده (kashida stretch on a held note), a one-camera oner, cut on the beat, paper cut-out letters.
+- **Your font**, if you have a licensed one. Default is Vazirmatn (free, OFL).
+
+Example: `/motion-reel ریلز ۱۲ ثانیه‌ای برای [محصول]، متن نهایی: «...»، «...». مخاطب: [...]. تکنیک اوج: نقطه‌ها آخر.`
+You will get a copy table (line, timing, Persian, English gloss) to approve before anything renders.
+
 ## 3. What happens after you ask
 1. Your brief gets scored out of 20 and torn apart. Answer the unknowns; don't skip them.
 2. `treatment.md`: three possible structures, the chosen one, why, and a sound plan.

@@ -28,6 +28,9 @@ bash tools/mux.sh films/my-film                                 # -> out/final.m
 bash tools/critique.sh films/my-film "" 4.2                     # contact / phone / seam / strip sheets + black frames
 node tools/readcheck.mjs films/my-film/index.html --safe reels  # every text on screen long enough to read
 bash tools/fetch-style.sh swiss-motion                          # read a style's demo code (into refs/)
+npm run new -- my-fa-film --fa                                  # Persian starter (Vazirmatn, shaped title, dots last)
+python3 tools/lint_persian.py copy "متن فارسی"                   # ی ک، digits, half-spaces, punctuation
+python3 tools/shape_persian.py lib/fonts/Vazirmatn-VF.ttf --lines films/x/lines.tsv --global films/x/glyphs.js
 ```
 Open `films/_starter/index.html` in a normal browser for a live looping preview.
 
@@ -38,9 +41,10 @@ Open `films/_starter/index.html` in a normal browser for a live looping preview.
 | `docs/KNOWLEDGE.md` | What was learned, and where the source article is wrong |
 | `docs/GUIDE.md` | For the person asking: how to brief for a better film |
 | `styles/` | 43 film styles (STYLE.md rules + DEMO.md notes) from Lemo-Opuscar, MIT |
-| `.claude/skills/` | `brief-critic`, `motion-reel`, `critique-pass` |
+| `.claude/skills/` | `brief-critic`, `motion-reel`, `critique-pass`, `persian-motion` |
 | `prompts/` | One-liner, brand reel, state spec, reference, library style, director's brief templates |
 | `lib/motion.js` | Springs, track, indicator, swapAlpha, seeded rng, beat grid, layout units |
+| `lib/persian.js` | `M.fa`: shaped-outline drawing, RTL wipes, ZWJ split, fa-IR numbers |
 | `render.mjs` | Deterministic renderer (video, slices, stills, any format) |
 | `tools/` | score synth, sfx, beat analysis, mux, critique sheets |
 | `films/_starter/` | Starter film to copy |

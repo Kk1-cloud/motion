@@ -9,6 +9,8 @@ The prompt is 10% of the video. The harness is the other 90%. Follow the gates i
 
 ## 0. Critique the ask
 Run the `brief-critic` skill on the request. Wait for answers to the unknowns unless told "just build it".
+Any Persian/Farsi/RTL text on screen: load the `persian-motion` skill too and start from
+`npm run new -- <name> --fa`.
 
 ## 1. Inputs to have before code
 Product + URL (or subject), audience + channel, duration, formats (9:16 / 1:1 / 16:9),

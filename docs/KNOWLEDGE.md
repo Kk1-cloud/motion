@@ -36,6 +36,8 @@ overstated, it says so below.
 - Scene boundaries on beats, not round seconds.
 
 ## RTL / Persian / Arabic
+(Full method: `.claude/skills/persian-motion/SKILL.md`, imported from atmirrr/persian-motion-director
+and re-measured for canvas. Helpers: `lib/persian.js`. Font: `lib/fonts/Vazirmatn-VF.woff2`, OFL.)
 - Load fonts explicitly (`M.loadFonts`, assign to `window.FILM_READY`). Canvas never triggers
   @font-face loading, so text silently renders in a fallback font. `render.mjs` awaits it.
 - Load both the arabic and latin subsets with unicode ranges: mixed lines ("منبع: Startup Genome")

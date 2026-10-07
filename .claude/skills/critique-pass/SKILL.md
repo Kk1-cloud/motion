@@ -44,6 +44,9 @@ alone (break at the comma or shrink the type instead) · subject too small or ja
 colour on the same colour (red on red) · subtitles covering the subject · a gag too fast to read ·
 blank frames in a transition · a spotlight/iris/caption that loses its subject after a camera move ·
 a visible action with no sound · no silence anywhere · a sign-off or name carried over from a demo.
+Persian (`persian-motion` skill): a letter in its isolated form inside a word · seams at joins ·
+clipped dots or the top of گ · Arabic ي ك or digits · a missing half-space · a reveal, stagger or
+camera move running left-to-right · letter-spacing used for emphasis · text under the platform buttons.
 
 ## 4. Log, fix, repeat
 Append to `films/<name>/review_log.md`:

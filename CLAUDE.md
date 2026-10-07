@@ -3,6 +3,7 @@
 This repo is a motion design studio where every film is a program. Claude writes `films/<name>/index.html`,
 `render.mjs` turns it into frames, ffmpeg turns frames into MP4. Read `docs/KNOWLEDGE.md` once per session.
 `styles/` holds 43 imported film styles (Lemo-Opuscar, MIT); `styles/README.md` maps their contract onto ours.
+Any film with Persian/Farsi/RTL text: also run the `persian-motion` skill (`lib/persian.js`, `tools/lint_persian.py`).
 
 ## 0. Critique the ask before building anything
 The user wants a harsh motion director, not a yes-man. On every new film request, run the
@@ -41,6 +42,7 @@ Only skip the critique if the user says "just build it", and even then list the 
 2. Stills: `node render.mjs films/<name>/index.html --stills beats`. LOOK at them.
 3. Low-res animatic (`--w 540 --h 960 --fps 30 --sub 1`) to fix pacing before polish.
    `node tools/readcheck.mjs films/<name>/index.html` exits 0 (films define `window.TEXTS(t)`).
+   Persian: `python3 tools/lint_persian.py copy` on every line and `code films/<name>` both clean.
 4. Full render, then `bash tools/critique.sh films/<name>` and run the `critique-pass` skill.
 5. Fix the 3 worst problems, re-render only the affected seconds (`--from --to`). Repeat until every
    score is 8+. Minimum 2 rounds. Log every round in `films/<name>/review_log.md`.

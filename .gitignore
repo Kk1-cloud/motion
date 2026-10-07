@@ -8,6 +8,7 @@ out/
 # Films are client/project work: only the starter is tracked
 films/*
 !films/_starter/
+!films/_fa-starter/
 
 # Fetched reference demos (tools/fetch-style.sh)
 refs/
